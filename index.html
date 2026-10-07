@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Günün Kelimesi</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kelime">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#C1272D">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --wall:#E4E8E2;--paper:#FCFCFA;--ink:#1D2433;--muted:#626C7B;--red:#C1272D;--rule:#D3D8D0;--soft:#F0F2EE;--onred:#FFFFFF;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --wall:#14171C;--paper:#1F232A;--ink:#E8EBEE;--muted:#9AA3AE;--red:#E5484D;--rule:#353B44;--soft:#272C34;--onred:#FFFFFF;
+  }
+}
+:root[data-theme="dark"]{
+  --wall:#14171C;--paper:#1F232A;--ink:#E8EBEE;--muted:#9AA3AE;--red:#E5484D;--rule:#353B44;--soft:#272C34;--onred:#FFFFFF;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--wall);color:var(--ink);font-family:"Work Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%}
+main{max-width:440px;margin:0 auto;padding:20px 16px 40px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+button:disabled{opacity:.4;cursor:default}
+
+.pad{perspective:900px;margin-bottom:22px}
+.leaf{
+  background:var(--paper);border-radius:6px;overflow:hidden;transform-origin:top center;
+  box-shadow:0 3px 0 -1px var(--paper),0 3px 0 0 var(--rule),0 6px 0 -1px var(--paper),0 6px 0 0 var(--rule),0 10px 24px -12px rgba(20,30,40,.35);
+}
+.leaf-head{background:var(--red);color:var(--onred);display:flex;justify-content:space-between;align-items:center;padding:10px 18px;font-weight:500;font-size:15px}
+.leaf-head #streak{font-size:13px;opacity:.92}
+.date{text-align:center;padding:14px 18px 0}
+.daynum{font-family:"Zilla Slab",Georgia,serif;font-weight:700;font-size:104px;line-height:1;letter-spacing:-.02em}
+.daynum.sun{color:var(--red)}
+.weekday{color:var(--muted);font-size:15px;margin-top:2px}
+.perf{border-top:2px dashed var(--rule);margin:18px 0 0}
+.body{padding:20px 22px 22px}
+.word-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+#word{font-family:"Zilla Slab",Georgia,serif;font-weight:700;font-size:40px;line-height:1.1;margin:0;overflow-wrap:anywhere}
+.speak{flex:none;width:46px;height:46px;border-radius:50%;border:1px solid var(--rule);background:transparent;display:grid;place-items:center}
+.speak svg{width:22px;height:22px}
+.pos{color:var(--muted);font-size:14px;margin:4px 0 18px;font-style:italic}
+.primary{width:100%;padding:13px 16px;border:0;border-radius:10px;background:var(--ink);color:var(--paper);font-weight:600}
+.tr{font-family:"Zilla Slab",Georgia,serif;font-weight:500;font-size:24px;margin:0 0 14px}
+.ex{margin:0;padding:12px 14px;background:var(--soft);border-left:3px solid var(--red);border-radius:0 8px 8px 0}
+.ex p{margin:0}
+.ex .en{font-weight:500}
+.ex .trs{color:var(--muted);font-size:15px;margin-top:4px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.toggle{padding:11px 10px;border-radius:10px;border:1px solid var(--rule);background:transparent;font-weight:500;font-size:15px}
+.toggle[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+.daynav{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;margin:0 0 30px}
+.daynav button{padding:10px 12px;border-radius:10px;border:1px solid var(--rule);background:var(--paper);font-size:14px;font-weight:500}
+
+section{margin-top:26px}
+h2{font-family:"Zilla Slab",Georgia,serif;font-weight:700;font-size:21px;margin:0 0 8px}
+ul{list-style:none;margin:0;padding:0;background:var(--paper);border-radius:8px}
+li{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--rule)}
+li:last-child{border-bottom:0}
+.li-main{flex:1;min-width:0;text-align:left;background:none;border:0;padding:0}
+.li-word{font-weight:600}
+.li-tr{color:var(--muted);font-size:14px}
+.li-date{flex:none;width:48px;color:var(--muted);font-size:13px}
+li.current .li-date{color:var(--red);font-weight:600}
+.check{flex:none;color:var(--red);font-size:14px}
+.mini{flex:none;border:1px solid var(--rule);background:transparent;border-radius:8px;padding:6px 10px;font-size:13px}
+.empty{color:var(--muted);font-size:15px;padding:14px 12px;display:block}
+.hint{color:var(--muted);font-size:13px;margin-top:28px;text-align:center}
+
+.leaf.turn-out{animation:out .26s ease-in forwards}
+.leaf.turn-in{animation:in .3s ease-out}
+@keyframes out{to{transform:translateY(-16px) rotateX(38deg);opacity:0}}
+@keyframes in{from{transform:translateY(10px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.leaf.turn-out,.leaf.turn-in{animation:none}}
+</style>
+</head>
+<body>
+<main>
+  <div class="pad">
+    <article class="leaf" id="leaf" aria-live="polite">
+      <header class="leaf-head"><span id="month"></span><span id="streak"></span></header>
+      <div class="date">
+        <div class="daynum" id="daynum"></div>
+        <div class="weekday" id="weekday"></div>
+      </div>
+      <div class="perf"></div>
+      <div class="body">
+        <div class="word-row">
+          <h1 id="word"></h1>
+          <button class="speak" id="speak" aria-label="Telaffuzu dinle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+          </button>
+        </div>
+        <p class="pos" id="pos"></p>
+        <button class="primary" id="reveal">Anlamını göster</button>
+        <div id="answer" hidden>
+          <p class="tr" id="tr"></p>
+          <div class="ex">
+            <p class="en" id="exEn"></p>
+            <p class="trs" id="exTr"></p>
+          </div>
+          <div class="actions">
+            <button class="toggle" id="known" aria-pressed="false">Biliyordum</button>
+            <button class="toggle" id="review" aria-pressed="false">Tekrar listeme ekle</button>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <nav class="daynav" aria-label="Gün seçimi">
+    <button id="prev">Önceki gün</button>
+    <button id="today">Bugün</button>
+    <button id="next">Sonraki gün</button>
+  </nav>
+
+  <section>
+    <h2>Tekrar listem</h2>
+    <ul id="reviewList"></ul>
+  </section>
+
+  <section>
+    <h2>Son 14 gün</h2>
+    <ul id="history"></ul>
+  </section>
+
+  <p class="hint">Telefonda uygulama gibi açmak için tarayıcının paylaş menüsünden “Ana Ekrana Ekle”yi seç.</p>
+</main>
+
+<script>
+const W=[
+["accomplish","v","başarmak, tamamlamak","She accomplished everything she planned this year.","Bu yıl planladığı her şeyi başardı."],
+["reliable","adj","güvenilir","I need a reliable car for long trips.","Uzun yolculuklar için güvenilir bir arabaya ihtiyacım var."],
+["reluctant","adj","isteksiz, gönülsüz","He was reluctant to share his opinion.","Fikrini paylaşmaya isteksizdi."],
+["approach","n/v","yaklaşım; yaklaşmak","We need a new approach to this problem.","Bu soruna yeni bir yaklaşıma ihtiyacımız var."],
+["consequence","n","sonuç (çoğunlukla olumsuz)","Every decision has consequences.","Her kararın sonuçları vardır."],
+["efficient","adj","verimli","This new system is more efficient.","Bu yeni sistem daha verimli."],
+["obvious","adj","açık, belli","The answer was obvious to everyone.","Cevap herkes için belliydi."],
+["struggle","v","zorlanmak, mücadele etmek","Many students struggle with grammar.","Birçok öğrenci dilbilgisinde zorlanır."],
+["reduce","v","azaltmak","We should reduce our expenses.","Harcamalarımızı azaltmalıyız."],
+["appropriate","adj","uygun","Is this outfit appropriate for a wedding?","Bu kıyafet düğün için uygun mu?"],
+["ensure","v","sağlamak, garanti etmek","Please ensure that the door is locked.","Lütfen kapının kilitli olduğundan emin olun."],
+["available","adj","mevcut, müsait","Is the manager available today?","Müdür bugün müsait mi?"],
+["increase","v","artmak, artırmak","Prices increased last month.","Fiyatlar geçen ay arttı."],
+["attempt","n/v","deneme; denemek","He passed the exam on his first attempt.","Sınavı ilk denemesinde geçti."],
+["benefit","n","fayda, yarar","Regular exercise has many benefits.","Düzenli egzersizin birçok faydası vardır."],
+["challenge","n","zorluk, meydan okuma","Learning a language is a real challenge.","Bir dil öğrenmek gerçek bir zorluktur."],
+["convince","v","ikna etmek","She convinced me to join the team.","Beni takıma katılmaya ikna etti."],
+["deserve","v","hak etmek","You deserve a break after all that work.","Onca işten sonra bir molayı hak ediyorsun."],
+["determine","v","belirlemek","The test will determine your level.","Test seviyeni belirleyecek."],
+["encourage","v","cesaretlendirmek, teşvik etmek","My teacher encouraged me to keep writing.","Öğretmenim yazmaya devam etmem için beni cesaretlendirdi."],
+["estimate","v","tahmin etmek, kestirmek","We estimate the project will take six months.","Projenin altı ay süreceğini tahmin ediyoruz."],
+["familiar","adj","tanıdık, aşina","Your face looks familiar.","Yüzün tanıdık geliyor."],
+["generous","adj","cömert","Thank you for your generous help.","Cömert yardımın için teşekkürler."],
+["ignore","v","görmezden gelmek","Don't ignore the warning signs.","Uyarı işaretlerini görmezden gelme."],
+["improve","v","geliştirmek, iyileşmek","Reading every day will improve your English.","Her gün okumak İngilizceni geliştirecek."],
+["influence","n/v","etki; etkilemek","Friends have a big influence on teenagers.","Arkadaşların gençler üzerinde büyük etkisi vardır."],
+["maintain","v","sürdürmek, bakımını yapmak","It is hard to maintain an old house.","Eski bir evin bakımını yapmak zordur."],
+["obtain","v","elde etmek, almak","You must obtain permission first.","Önce izin almalısın."],
+["occur","v","meydana gelmek","The accident occurred at night.","Kaza gece meydana geldi."],
+["prevent","v","önlemek","Washing your hands prevents illness.","Ellerini yıkamak hastalığı önler."],
+["require","v","gerektirmek","This job requires patience.","Bu iş sabır gerektirir."],
+["suggest","v","önermek","I suggest we leave early.","Erken çıkmamızı öneririm."],
+["temporary","adj","geçici","This is only a temporary solution.","Bu sadece geçici bir çözüm."],
+["thorough","adj","kapsamlı, titiz","The doctor did a thorough check-up.","Doktor kapsamlı bir muayene yaptı."],
+["aware","adj","farkında","Are you aware of the risks?","Risklerin farkında mısın?"],
+["confident","adj","kendinden emin","She felt confident before the interview.","Mülakattan önce kendinden emin hissetti."],
+["curious","adj","meraklı","Children are naturally curious.","Çocuklar doğal olarak meraklıdır."],
+["delay","n/v","gecikme; geciktirmek","The flight was delayed by two hours.","Uçuş iki saat gecikti."],
+["effort","n","çaba","Thanks for your effort.","Çaban için teşekkürler."],
+["evidence","n","kanıt","There is no evidence that he was there.","Onun orada olduğuna dair hiçbir kanıt yok."],
+["feature","n","özellik","This phone has some useful new features.","Bu telefonun bazı kullanışlı yeni özellikleri var."],
+["habit","n","alışkanlık","Reading before bed is a good habit.","Yatmadan önce okumak iyi bir alışkanlıktır."],
+["issue","n","mesele, sorun","We discussed several important issues.","Birkaç önemli meseleyi tartıştık."],
+["opportunity","n","fırsat","Don't miss this opportunity.","Bu fırsatı kaçırma."],
+["purpose","n","amaç","What is the purpose of your visit?","Ziyaretinizin amacı nedir?"],
+["responsibility","n","sorumluluk","Taking care of a pet is a big responsibility.","Bir evcil hayvana bakmak büyük bir sorumluluktur."],
+["solution","n","çözüm","We finally found a solution.","Sonunda bir çözüm bulduk."],
+["variety","n","çeşitlilik","The shop sells a variety of fruits.","Dükkan çeşit çeşit meyve satıyor."],
+["achieve","v","ulaşmak, başarmak","Hard work helps you achieve your goals.","Çok çalışmak hedeflerine ulaşmana yardım eder."],
+["admit","v","kabul etmek, itiraf etmek","He admitted that he was wrong.","Hatalı olduğunu kabul etti."],
+["afford","v","(parası, zamanı) yetmek","I can't afford a new car right now.","Şu an yeni bir arabaya param yetmez."],
+["anxious","adj","endişeli","She was anxious about the results.","Sonuçlar konusunda endişeliydi."],
+["apparently","adv","görünüşe göre","Apparently, the meeting was cancelled.","Görünüşe göre toplantı iptal edildi."],
+["argue","v","tartışmak, atışmak","My neighbours argue all the time.","Komşularım sürekli tartışıyor."],
+["assume","v","varsaymak","I assume you have already eaten.","Zaten yemek yediğini varsayıyorum."],
+["avoid","v","kaçınmak","Try to avoid sugary drinks.","Şekerli içeceklerden kaçınmaya çalış."],
+["borrow","v","ödünç almak","Can I borrow your pen?","Kalemini ödünç alabilir miyim?"],
+["brief","adj","kısa, öz","He gave a brief explanation.","Kısa bir açıklama yaptı."],
+["cancel","v","iptal etmek","They cancelled the match because of rain.","Yağmur nedeniyle maçı iptal ettiler."],
+["claim","v","iddia etmek","He claims he saw a ghost.","Bir hayalet gördüğünü iddia ediyor."],
+["compare","v","karşılaştırmak","Compare the prices before you buy.","Satın almadan önce fiyatları karşılaştır."],
+["complain","v","şikâyet etmek","She complained about the noise.","Gürültüden şikâyet etti."],
+["consider","v","düşünmek, göz önünde bulundurmak","Have you considered moving abroad?","Yurt dışına taşınmayı düşündün mü?"],
+["contain","v","içermek","This drink contains a lot of sugar.","Bu içecek çok şeker içeriyor."],
+["decrease","v","azalmak","The number of visitors decreased.","Ziyaretçi sayısı azaldı."],
+["demand","n/v","talep; talep etmek","There is high demand for engineers.","Mühendislere yüksek talep var."],
+["depend on","phr","-e bağlı olmak","It depends on the weather.","Havaya bağlı."],
+["describe","v","tarif etmek, betimlemek","Can you describe the man you saw?","Gördüğün adamı tarif edebilir misin?"],
+["disappointed","adj","hayal kırıklığına uğramış","I was disappointed with the film.","Filmden hayal kırıklığına uğradım."],
+["eventually","adv","sonunda, en sonunda","Eventually, we found the right house.","Sonunda doğru evi bulduk."],
+["exhausted","adj","bitkin, çok yorgun","I was exhausted after the long trip.","Uzun yolculuktan sonra bitkindim."],
+["expand","v","genişlemek, büyümek","The company plans to expand next year.","Şirket gelecek yıl büyümeyi planlıyor."],
+["fortunately","adv","neyse ki","Fortunately, nobody was hurt.","Neyse ki kimse yaralanmadı."],
+["gradually","adv","yavaş yavaş, giderek","His health gradually improved.","Sağlığı yavaş yavaş düzeldi."],
+["handle","v","başa çıkmak, halletmek","Can you handle this alone?","Bunu tek başına halledebilir misin?"],
+["identify","v","tespit etmek, tanımlamak","The police identified the driver.","Polis sürücünün kimliğini tespit etti."],
+["impressive","adj","etkileyici","Her presentation was very impressive.","Sunumu çok etkileyiciydi."],
+["include","v","içermek, dahil etmek","The price includes breakfast.","Fiyata kahvaltı dahil."],
+["intend","v","niyet etmek","I intend to finish this by Friday.","Bunu cumaya kadar bitirmeye niyetliyim."],
+["likely","adj","muhtemel","It is likely to rain tomorrow.","Yarın yağmur yağması muhtemel."],
+["mention","v","bahsetmek","Did he mention his new job?","Yeni işinden bahsetti mi?"],
+["necessary","adj","gerekli","Is it necessary to book in advance?","Önceden rezervasyon yapmak gerekli mi?"],
+["notice","v","fark etmek","I didn't notice the mistake.","Hatayı fark etmedim."],
+["permanent","adj","kalıcı","She is looking for a permanent job.","Kalıcı bir iş arıyor."],
+["postpone","v","ertelemek","The meeting was postponed until Monday.","Toplantı pazartesiye ertelendi."],
+["predict","v","öngörmek, tahmin etmek","Nobody can predict the future.","Kimse geleceği öngöremez."],
+["proper","adj","düzgün, uygun","You need proper shoes for hiking.","Doğa yürüyüşü için düzgün ayakkabıya ihtiyacın var."],
+["rarely","adv","nadiren","I rarely watch TV these days.","Bu aralar nadiren televizyon izliyorum."],
+["recognize","v","tanımak","I didn't recognize you with glasses.","Seni gözlükle tanıyamadım."],
+["recommend","v","tavsiye etmek","Can you recommend a good restaurant?","İyi bir restoran tavsiye edebilir misin?"],
+["regret","v","pişman olmak","I regret not studying harder.","Daha çok çalışmadığım için pişmanım."],
+["rely on","phr","-e güvenmek, bel bağlamak","You can always rely on me.","Bana her zaman güvenebilirsin."],
+["replace","v","değiştirmek, yerine koymak","We need to replace the old battery.","Eski pili değiştirmemiz gerekiyor."],
+["significant","adj","önemli, kayda değer","There was a significant change in prices.","Fiyatlarda kayda değer bir değişiklik oldu."],
+["sufficient","adj","yeterli","We don't have sufficient time.","Yeterli zamanımız yok."],
+["tend to","v","-me eğiliminde olmak","People tend to sleep less in summer.","İnsanlar yazın daha az uyuma eğilimindedir."],
+["unless","conj","-medikçe, -mezse","You will miss the bus unless you hurry.","Acele etmezsen otobüsü kaçıracaksın."],
+["whereas","conj","oysa, -iken","I like tea, whereas my brother prefers coffee.","Ben çayı severim, oysa kardeşim kahveyi tercih eder."],
+["worth","adj","değer","This book is worth reading.","Bu kitap okumaya değer."],
+["get used to","phr","-e alışmak","I'm getting used to the cold weather.","Soğuk havaya alışıyorum."],
+["figure out","phr","çözmek, anlamak","I can't figure out how this works.","Bunun nasıl çalıştığını çözemiyorum."],
+["come up with","phr","(fikir, çözüm) bulmak","She came up with a great idea.","Harika bir fikir buldu."],
+["look forward to","phr","dört gözle beklemek","I'm looking forward to the holiday.","Tatili dört gözle bekliyorum."],
+["put off","phr","ertelemek","Don't put off your homework.","Ödevini erteleme."],
+["run out of","phr","tükenmek, bitmek","We ran out of milk.","Sütümüz bitti."],
+["carry out","phr","yürütmek, gerçekleştirmek","The team carried out a survey.","Ekip bir anket yürüttü."],
+["take advantage of","phr","-den faydalanmak","Take advantage of the good weather.","Güzel havadan faydalan."],
+["nevertheless","adv","yine de, buna rağmen","It was raining; nevertheless, we went out.","Yağmur yağıyordu; yine de dışarı çıktık."],
+["moreover","adv","üstelik, ayrıca","The hotel was cheap; moreover, it was clean.","Otel ucuzdu; üstelik temizdi."],
+["despite","prep","-e rağmen","Despite the traffic, we arrived on time.","Trafiğe rağmen zamanında vardık."]
+];
+const POS={v:"fiil",n:"isim",adj:"sıfat",adv:"zarf",phr:"kalıp / öbek fiil",conj:"bağlaç",prep:"edat","n/v":"isim / fiil"};
+const MONTHS=["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+const MSHORT=["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+const DAYS=["Pazar","Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi"];
+const BY=Object.fromEntries(W.map(w=>[w[0],w]));
+const $=id=>document.getElementById(id);
+
+function rng(s){return function(){s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const order=W.map((_,i)=>i);
+(()=>{const r=rng(20261007);for(let i=order.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[order[i],order[j]]=[order[j],order[i]]}})();
+function dayNum(d){return Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5)}
+function wordFor(d){const n=dayNum(d);return W[order[((n%W.length)+W.length)%W.length]]}
+function dateAt(off){const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+off);return d}
+
+function load(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def}catch(e){return def}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+let known=load("gk_known",[]), review=load("gk_review",[]), seen=load("gk_seen",[]);
+let offset=0, todayKey=dayNum(new Date());
+
+function markSeen(){
+  const t=dayNum(new Date());
+  if(!seen.includes(t)){seen.push(t);seen=seen.slice(-400);save("gk_seen",seen)}
+  let s=0;while(seen.includes(t-s))s++;
+  $("streak").textContent=s>1?s+" gündür üst üste":"";
+}
+
+const canSpeak="speechSynthesis" in window;
+function speak(text){
+  if(!canSpeak)return;
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=.9;speechSynthesis.speak(u)}catch(e){}
+}
+
+function current(){return wordFor(dateAt(offset))}
+
+function render(){
+  const d=dateAt(offset), w=wordFor(d);
+  $("month").textContent=MONTHS[d.getMonth()]+" "+d.getFullYear();
+  $("daynum").textContent=d.getDate();
+  $("daynum").classList.toggle("sun",d.getDay()===0);
+  $("weekday").textContent=DAYS[d.getDay()];
+  $("word").textContent=w[0];
+  $("pos").textContent=POS[w[1]]||w[1];
+  $("tr").textContent=w[2];
+  $("exEn").textContent=w[3];
+  $("exTr").textContent=w[4];
+  $("answer").hidden=true;$("reveal").hidden=false;
+  $("speak").hidden=!canSpeak;
+  $("prev").disabled=offset<=-60;$("next").disabled=offset>=0;$("today").disabled=offset===0;
+  syncToggles();renderLists();
+}
+
+function syncToggles(){
+  const w=current()[0];
+  const k=known.includes(w), r=review.includes(w);
+  $("known").setAttribute("aria-pressed",k);$("known").textContent=k?"Bildiklerimde":"Biliyordum";
+  $("review").setAttribute("aria-pressed",r);$("review").textContent=r?"Tekrar listesinde":"Tekrar listeme ekle";
+}
+
+function renderLists(){
+  const rl=$("reviewList");rl.innerHTML="";
+  if(!review.length){rl.innerHTML='<li><span class="empty">Zorlandığın kelimeleri “Tekrar listeme ekle” ile buraya topla.</span></li>'}
+  review.slice().reverse().forEach(word=>{
+    const w=BY[word];if(!w)return;
+    const li=document.createElement("li");
+    li.innerHTML='<div class="li-main"><div class="li-word"></div><div class="li-tr"></div></div>';
+    li.querySelector(".li-word").textContent=w[0];li.querySelector(".li-tr").textContent=w[2];
+    if(canSpeak){const b=document.createElement("button");b.className="mini";b.textContent="Dinle";b.setAttribute("aria-label",w[0]+" kelimesini dinle");b.onclick=()=>speak(w[0]);li.appendChild(b)}
+    const x=document.createElement("button");x.className="mini";x.textContent="Kaldır";x.setAttribute("aria-label",w[0]+" kelimesini listeden kaldır");
+    x.onclick=()=>{review=review.filter(v=>v!==word);save("gk_review",review);syncToggles();renderLists()};
+    li.appendChild(x);rl.appendChild(li);
+  });
+
+  const h=$("history");h.innerHTML="";
+  for(let i=0;i>-14;i--){
+    const d=dateAt(i), w=wordFor(d);
+    const li=document.createElement("li");if(i===offset)li.className="current";
+    const ds=document.createElement("span");ds.className="li-date";ds.textContent=i===0?"Bugün":d.getDate()+" "+MSHORT[d.getMonth()];
+    const b=document.createElement("button");b.className="li-main";
+    b.innerHTML='<div class="li-word"></div><div class="li-tr"></div>';
+    b.querySelector(".li-word").textContent=w[0];b.querySelector(".li-tr").textContent=w[2];
+    b.onclick=()=>{go(i-offset);window.scrollTo({top:0,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})};
+    li.append(ds,b);
+    if(known.includes(w[0])){const c=document.createElement("span");c.className="check";c.textContent="✓";c.setAttribute("aria-label","biliniyor");li.appendChild(c)}
+    h.appendChild(li);
+  }
+}
+
+function go(delta){
+  if(!delta)return;
+  const target=Math.min(0,Math.max(-60,offset+delta));
+  if(target===offset)return;
+  const leaf=$("leaf");
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){offset=target;render();return}
+  leaf.classList.remove("turn-in");leaf.classList.add("turn-out");
+  leaf.addEventListener("animationend",function done(){
+    leaf.removeEventListener("animationend",done);
+    offset=target;render();
+    leaf.classList.remove("turn-out");void leaf.offsetWidth;leaf.classList.add("turn-in");
+  });
+}
+
+$("reveal").onclick=()=>{$("answer").hidden=false;$("reveal").hidden=true};
+$("speak").onclick=()=>speak(current()[0]);
+$("known").onclick=()=>{
+  const w=current()[0];
+  if(known.includes(w))known=known.filter(v=>v!==w);else{known.push(w);review=review.filter(v=>v!==w);save("gk_review",review)}
+  save("gk_known",known);syncToggles();renderLists();
+};
+$("review").onclick=()=>{
+  const w=current()[0];
+  if(review.includes(w))review=review.filter(v=>v!==w);else{review.push(w);known=known.filter(v=>v!==w);save("gk_known",known)}
+  save("gk_review",review);syncToggles();renderLists();
+};
+$("prev").onclick=()=>go(-1);
+$("next").onclick=()=>go(1);
+$("today").onclick=()=>go(-offset);
+
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible"){
+    const t=dayNum(new Date());
+    if(t!==todayKey){todayKey=t;offset=0;markSeen();render()}
+  }
+});
+
+markSeen();render();
+</script>
+</body>
+</html>
